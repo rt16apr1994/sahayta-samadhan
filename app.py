@@ -4,7 +4,7 @@ import pandas as pd
 
 st.set_page_config(page_title="Sahayta Portal", layout="centered")
 
-# Connection establish karna
+# Google Sheets Connection
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 st.title("🤝 Sahayta: Connection Portal")
@@ -15,7 +15,6 @@ choice = st.sidebar.selectbox("Menu", menu)
 if choice == "Home":
     st.markdown("### Empowering Students & Professionals")
     st.write("This platform connects people facing communication challenges with experts.")
-    
 
 elif choice == "Registration":
     st.subheader("Join the Community")
@@ -33,23 +32,27 @@ elif choice == "Registration":
 
             if submit:
                 if name and contact and email:
-                    # Naya data prepare karna
-                    new_row = pd.DataFrame([{
+                    # Naya data jo save karna hai
+                    new_row = {
                         "Name": name, 
                         "Contact": contact, 
                         "Email": email, 
                         "Role": role, 
                         "Detail": detail
-                    }])
+                    }
                     
-                    # Purana data read karna
-                    existing_data = conn.read(worksheet="sahayta-samadhan", usecols=[0,1,2,3,4])
-                    updated_df = pd.concat([existing_data, new_row], ignore_index=True)
+                    try:
+                        # Aapki sheet ka naam 'sahayta-samadhan' yahan use ho raha hai
+                        existing_data = conn.read(worksheet="sahayta-samadhan")
+                        updated_df = pd.concat([existing_data, pd.DataFrame([new_row])], ignore_index=True)
+                    except Exception:
+                        # Agar sheet khali hai ya koi error hai toh naya dataframe banayein
+                        updated_df = pd.DataFrame([new_row])
                     
                     # Google Sheet ko update karna
                     conn.update(worksheet="sahayta-samadhan", data=updated_df)
                     
-                    st.success("✅ Success! Your details are saved in our database.")
+                    st.success(f"✅ Success! Your details as {role} are saved.")
                     st.balloons()
                 else:
                     st.warning("Please fill all mandatory fields.")
