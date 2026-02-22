@@ -2,62 +2,54 @@ import streamlit as st
 from streamlit_gsheets import GSheetsConnection
 import pandas as pd
 
-# Page Configuration
-st.set_page_config(page_title="Sahayta - Connect & Grow", layout="wide")
+st.set_page_config(page_title="Sahayta Portal", layout="centered")
 
-# Google Sheets Connection
+# Connection establish karna
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-st.title("🤝 Sahayta: Overcome Your Communication Fears")
-st.markdown("Bridge the gap between those who need help and those who can provide solutions.")
+st.title("🤝 Sahayta: Connection Portal")
 
-# Navigation
-menu = ["Home", "Registration", "Resources"]
+menu = ["Home", "Registration"]
 choice = st.sidebar.selectbox("Menu", menu)
 
 if choice == "Home":
-    st.subheader("Welcome to our Community")
-    st.write("Whether you struggle with stage fright, anxiety during counter-questions, or managing emotions, we are here to connect you with the right mentors.")
+    st.markdown("### Empowering Students & Professionals")
+    st.write("This platform connects people facing communication challenges with experts.")
+    
 
 elif choice == "Registration":
-    st.subheader("Join the Platform")
+    st.subheader("Join the Community")
     
-    # Role Selection Dropdown
     role = st.selectbox("Please select your role", ["--Select--", "Student/Needy/Learner", "Expert/Trainer/Teacher"])
 
     if role != "--Select--":
-        st.write(f"You are registering as: **{role}**")
-        
-        with st.form(key="registration_form"):
+        with st.form(key="reg_form"):
             name = st.text_input("Full Name*")
             contact = st.text_input("Contact Number*")
             email = st.text_input("Email ID*")
+            detail = st.text_area("Specific Issue or Expertise area*")
             
-            # Specific details based on role
-            if role == "Student/Needy/Learner":
-                issue = st.selectbox("Main Concern", ["Stage Fear", "Breathlessness", "Anger Management", "Answering Questions"])
-            else:
-                issue = st.text_input("Area of Expertise (e.g. Public Speaking)")
+            submit = st.form_submit_button("Submit & Connect")
 
-            submit_button = st.form_submit_button(label="Submit Details")
-
-            if submit_button:
+            if submit:
                 if name and contact and email:
-                    # Prepare data for Google Sheets
-                    new_data = pd.DataFrame([{
-                        "Name": name,
-                        "Contact": contact,
-                        "Email": email,
-                        "Role": role,
-                        "Detail/Issue": issue
+                    # Naya data prepare karna
+                    new_row = pd.DataFrame([{
+                        "Name": name, 
+                        "Contact": contact, 
+                        "Email": email, 
+                        "Role": role, 
+                        "Detail": detail
                     }])
                     
-                    # Logically saving to Sheet (You need to configure the URL in secrets)
-                    # st.write(new_data) # Testing purpose
-                    st.success(f"Thank you {name}! Your details as a {role} have been submitted.")
+                    # Purana data read karna
+                    existing_data = conn.read(worksheet="Sheet1", usecols=[0,1,2,3,4])
+                    updated_df = pd.concat([existing_data, new_row], ignore_index=True)
+                    
+                    # Google Sheet ko update karna
+                    conn.update(worksheet="Sheet1", data=updated_df)
+                    
+                    st.success("✅ Success! Your details are saved in our database.")
+                    st.balloons()
                 else:
-                    st.error("Please fill all mandatory fields.")
-
-elif choice == "Resources":
-    st.subheader("Self-Help Guide")
-    st.info("💡 **Tip:** Practice 'Power Posing' for 2 minutes before any presentation to boost confidence.")
+                    st.warning("Please fill all mandatory fields.")
