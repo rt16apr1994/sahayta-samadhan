@@ -43,11 +43,11 @@ elif choice == "Registration":
                     }])
                     
                     # Purana data read karna
-                    existing_data = conn.read(worksheet="Sheet1", usecols=[0,1,2,3,4])
+                    existing_data = conn.read(worksheet="sahayta-samadhan", usecols=[0,1,2,3,4])
                     updated_df = pd.concat([existing_data, new_row], ignore_index=True)
                     
                     # Google Sheet ko update karna
-                    conn.update(worksheet="Sheet1", data=updated_df)
+                    conn.update(worksheet="sahayta-samadhan", data=updated_df)
                     
                     st.success("✅ Success! Your details are saved in our database.")
                     st.balloons()
